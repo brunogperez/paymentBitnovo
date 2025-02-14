@@ -19,18 +19,26 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.brunogperez91.paymentbitnovo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-font",
-      {
-        "fonts": [
-          "./assets/fonts/Mulish.ttf"
-        ]
-      }]
-    ]
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Mulish.ttf"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "95bc6b55-5f05-4776-9444-5635481a33ec"
+      }
+    }
   }
 }

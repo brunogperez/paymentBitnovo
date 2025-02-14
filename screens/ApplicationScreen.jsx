@@ -25,8 +25,6 @@ const ApplicationScreen = ({ navigation, route }) => {
     const { orderResult, orderData, selectedCurrency } = route.params;
     const { web_url, identifier } = orderResult;
 
-    console.log(web_url)
-
     const ws = useRef(null);
 
     useEffect(() => {
