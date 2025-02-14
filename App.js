@@ -17,7 +17,7 @@ import {
   Mulish_800ExtraBold_Italic,
   Mulish_900Black_Italic,
 } from "@expo-google-fonts/mulish";
-import { ActivityIndicator } from "react-native";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import CreatePayment from "./screens/CreatePayment";
