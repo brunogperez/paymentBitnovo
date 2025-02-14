@@ -15,6 +15,9 @@ export const CreatePayment = () => {
     const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
     const [showSelector, setShowSelector] = useState(false);
     const [charCount, setCharCount] = useState(0);
+    const [inputHeight, setInputHeight] = useState(80);
+    const isAmountEmpty = amount.trim() === "";
+
 
     const handleCurrencySelect = (currency) => {
         setSelectedCurrency(currency);
@@ -27,14 +30,10 @@ export const CreatePayment = () => {
             setCharCount(text.length);
         }
     };
-    const [inputHeight, setInputHeight] = useState(80);
 
     const handleContentSizeChange = (contentWidth, contentHeight) => {
-
         setInputHeight(Math.min(Math.max(contentHeight, 80), 150));
     };
-
-    const isAmountEmpty = amount.trim() === "";
 
     const handleCreateOrder = async () => {
         try {
@@ -62,7 +61,7 @@ export const CreatePayment = () => {
                     <MaterialIcons name="keyboard-arrow-down" size={24} color="#002859" />
                 </TouchableOpacity>
             </View>
-            <View style={styles.amountContainer}>
+            <View style={[styles.amountContainer, { flexDirection: selectedCurrency.abbreviation === "EUR" ? "row-reverse" : "row" }]}>
                 <Text style={[styles.dollarSign, { color: amount.trim() === "" ? '#C0CCDA' : '#035AC5' }]}>
                     {selectedCurrency.symbol || "$"}
                 </Text>

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -7,7 +8,10 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { ModalCustom } from '../components/ModalCustom';
 import ModalQRCode from '../components/ModalQRCode';
 import { countries } from '../services/countries';
-import ModalRequestSent from '../components/ModalRequestSent';
+import ModalRequestSent from '../components/ModalRequestSent'
+import { apiKEY, xDeviceID } from '../services/enviroment';
+
+
 
 const ApplicationScreen = ({ navigation, route }) => {
 
@@ -21,41 +25,46 @@ const ApplicationScreen = ({ navigation, route }) => {
     const { orderResult, orderData, selectedCurrency } = route.params;
     const { web_url, identifier } = orderResult;
 
+    console.log(web_url)
+
     const ws = useRef(null);
 
     useEffect(() => {
-        ws.current = new WebSocket(`wss://payments.pre-bnvo.com/ws/merchant/${identifier}`);
 
+        ws.current = new WebSocket(`wss://payments.pre-bnvo.com/ws/merchant/${identifier}`, {
+            headers: {
+                "X-Device-Id": `${xDeviceID}`,
+                "X-API-Key": `${apiKEY}`,
+            }
+        });
         ws.current.onopen = () => {
-            console.log('Conectado a WebSocket');
-            ws.current.send(JSON.stringify({ action: "subscribe", orderId: orderResult.order_id }));
+            console.log('Conexión WebSocket abierta');
+            ws.current.send('Hola, servidor!');
         };
-
         ws.current.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('Mensaje recibido:', data);
-            if (data.status === 'paid') {
-                alert('El pago ha sido completado');
+
+            try {
+                const message = JSON.parse(event.data);
+                const status = message.status;
+                if (status === 'CO') {
+                    navigation.navigate('PaymentComplete')
+                }
+            } catch (err) {
+                console.log('No se pudo parsear el mensaje:', event.data);
             }
         };
-        
-        ws.current.onmessage = (event) => {
-            console.log('Mensaje recibido:', event.data);
-            console.log(`Mensaje recibido: ${event.data}`); 
+        ws.current.onerror = (event) => {
+            console.log('Error WebSocket:', event.message);
         };
-        ws.current.onerror = (error) => {
-            console.error('Error en WebSocket:', error);
+        ws.current.onclose = (event) => {
+            console.log('Conexión WebSocket cerrada:', event.code, event.reason);
         };
-
-        ws.current.onclose = () => {
-            console.log('WebSocket cerrado');
-        };
-
         return () => {
-            ws.current.close();
+            if (ws.current) {
+                ws.current.close();
+            }
         };
     }, [identifier]);
-
 
     const handleItemSelect = (country) => {
         setSelectedCountry(country);
@@ -72,15 +81,23 @@ const ApplicationScreen = ({ navigation, route }) => {
             <View style={styles.headerContainerMain}>
                 <View style={styles.headerContainer}>
                     <View>
-                        <MaterialIcons name='wallet' size={48} color='#035AC5' opacity={0.4} />
+                        <MaterialIcons name='wallet' size={48} color='#035AC5' opacity={0.5} />
                     </View>
                     <View>
                         <Text style={styles.headerTitle}>
                             Solicitud de pago
                         </Text>
-                        <Text style={styles.headerAmount}>
-                            {selectedCurrency.symbol} {orderData.expected_output_amount}
-                        </Text>
+                        <View style={styles.headerAmount}>
+                            <View style={{ gap: 8, flexDirection: selectedCurrency.symbol === "€" ? "row-reverse" : "row" }}>
+                                <Text style={styles.headerAmountText}>
+                                    {selectedCurrency.symbol}
+                                </Text>
+                                <Text style={styles.headerAmountText}>
+                                    {orderData.expected_output_amount}
+                                </Text>
+
+                            </View>
+                        </View>
                     </View>
                 </View>
                 <View>
@@ -92,7 +109,7 @@ const ApplicationScreen = ({ navigation, route }) => {
             <View style={styles.shareContainer}>
                 <View style={{ alignItems: 'center', justifyContent: 'center', gap: 16, flexDirection: 'row', width: '100%' }}>
                     <TouchableOpacity style={{ ...styles.shareButton, width: 267 }} >
-                        <Ionicons name="link" size={20} color='#035AC5' opacity={0.4} />
+                        <Ionicons name="link" size={20} color='#035AC5'  />
                         <Text style={styles.shareText}>
                             {web_url ? web_url.replace(/^https?:\/\//, "") : ""}
                         </Text>
@@ -102,13 +119,13 @@ const ApplicationScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity style={styles.shareButton} >
-                    <Ionicons name="mail" size={20} color='#035AC5' opacity={0.4} />
+                    <Ionicons name="mail" size={20} color='#035AC5'  />
                     <Text style={styles.shareText}>
                         Enviar por correo electrónico
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.shareButton} onPress={() => setIsEditing(true)}>
-                    <FontAwesome name="whatsapp" size={20} color='#035AC5' opacity={0.4} />
+                    <FontAwesome name="whatsapp" size={20} color='#035AC5'  />
                     {isEditing ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginHorizontal: 16 }}>
                             <TouchableOpacity style={styles.selector} onPress={handleItemSelect} >
@@ -124,7 +141,7 @@ const ApplicationScreen = ({ navigation, route }) => {
                                 value={phoneNumber}
                                 onChangeText={setPhoneNumber}
                             />
-                            <TouchableOpacity style={styles.sendButton} onPress={() => handleSentWhatsapp()}>
+                            <TouchableOpacity style={styles.sendButton} onPress={handleSentWhatsapp}>
                                 <Text style={styles.sendText}>Enviar</Text>
                             </TouchableOpacity>
                         </View>
@@ -137,15 +154,15 @@ const ApplicationScreen = ({ navigation, route }) => {
                     )
                     }
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.shareButton} onPress={() => setIsEditing(true)}>
-                    <Ionicons name="share" size={20} color='#035AC5' opacity={0.4} />
+                <TouchableOpacity style={styles.shareButton}>
+                    <Ionicons name="share" size={20} color='#035AC5'  />
                     <Text style={styles.shareText}>
                         Compartir con otras aplicaciones
                     </Text>
                 </TouchableOpacity>
             </View >
             <View style={{ justifyContent: 'flex-end' }}>
-                <TouchableOpacity style={styles.continueButton} onPress={()=> navigation.navigate('CreatePayment')}>
+                <TouchableOpacity style={styles.continueButton} onPress={() => navigation.navigate('CreatePayment')}>
                     <Text style={styles.continueText}>Nueva solicitud</Text>
                     <MaterialIcons name='wallet' size={24} color='#035AC5' />
                 </TouchableOpacity>
@@ -206,6 +223,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Mulish_400Regular',
     },
     headerAmount: {
+        alignItems: 'flex-start',
+    },
+    headerAmountText: {
         fontSize: 34,
         color: '#002859',
         fontFamily: 'Mulish_700Bold',
@@ -237,7 +257,7 @@ const styles = StyleSheet.create({
     shareText: {
         color: '#002859',
         fontFamily: 'Mulish_400Regular',
-        fontSize: 16,
+        fontSize: 15,
         marginLeft: 10,
     },
     qrButton: {

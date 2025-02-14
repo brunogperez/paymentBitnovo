@@ -1,8 +1,24 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useLayoutEffect } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const PaymentComplete = ({navigation}) => {
+
+    useEffect(() => {
+        const backAction = () => { 
+            return true;
+        };
+        BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', backAction);
+        };
+    }, []);
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            gestureEnabled: false, 
+        });
+    }, [navigation]);
+
     return (
         <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
