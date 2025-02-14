@@ -17,12 +17,11 @@ import {
   Mulish_800ExtraBold_Italic,
   Mulish_900Black_Italic,
 } from "@expo-google-fonts/mulish";
-
-import { StyleSheet } from "react-native";
-import CreatePayment from "./screens/CreatePayment";
-import { NavigationContainer } from "@react-navigation/native";
-import ApplicationScreen from "./screens/ApplicationScreen";
+import { ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import CreatePayment from "./screens/CreatePayment";
+import ApplicationScreen from "./screens/ApplicationScreen";
 import PaymentComplete from "./screens/PaymentComplete";
 
 const Stack = createNativeStackNavigator();
@@ -73,12 +72,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: " #FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

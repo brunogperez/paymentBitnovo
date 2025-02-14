@@ -32,7 +32,7 @@ export const createOrder = async (orderData ) => {
         });
         return response.data
     } catch (error) {
-        console.error("Error al crear la orden:", error.response?.data || error.message);
+        console.error("Error al crear la orden:", error.response?.data.detail );
         throw error;
     }
 };
